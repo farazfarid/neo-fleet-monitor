@@ -80,8 +80,7 @@ export class Landing {
     afterNextRender(() => {
       ctx = gsap.context(() => {
         gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
-          gsap.from('[data-hero] > *', { y: 18, opacity: 0, duration: .7, ease: 'power3.out', stagger: .08 });
-          gsap.from('app-hero-live', { y: 28, opacity: 0, duration: .9, ease: 'power3.out', delay: .2 });
+          // The hero (LCP) is never animated: it must be readable before any script runs.
           gsap.utils.toArray<HTMLElement>('[data-reveal]').forEach(el =>
             gsap.from(el, { y: 32, opacity: 0, duration: .8, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 85%' } }));
           gsap.utils.toArray<SVGPathElement>('[data-draw]').forEach(p => {
