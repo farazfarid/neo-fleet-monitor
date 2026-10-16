@@ -1,0 +1,75 @@
+<header class="bar">
+  <a routerLink="/" class="brand" aria-label="Fleet Monitor Startseite">
+    <app-fan-glyph class="mark" />
+    <span>Fleet Monitor</span>
+  </a>
+  <div class="status" role="status">
+    <span class="pill"><span class="dot" [class.on]="t.connected()" [class.bad]="!t.connected()"></span>Broker</span>
+    <span class="pill" [title]="t.backendOnline() ? 'Alarm-Regel und DCV-Regler laufen' : 'Kein Heartbeat seit 30 s'">
+      <span class="dot" [class.on]="t.backendOnline()" [class.bad]="!t.backendOnline()"></span>Backend
+    </span>
+  </div>
+  <div class="actions">
+    <button type="button" class="btn" (click)="toggleSim()" [attr.aria-pressed]="sim.running()">
+      {{ sim.running() ? 'Simulation stoppen' : 'Lüfter simulieren' }}
+    </button>
+    <button type="button" class="btn btn-primary" (click)="openQr()">iPhone verbinden</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="stats" aria-label="Flottenübersicht">
+    <div><span>Geräte online</span><strong>{{ t.onlineCount() }}<small> / {{ t.devices().length }}</small></strong></div>
+    <div><span>Aktive Alarme</span><strong [class.lvl-critical]="t.activeAlarms() > 0">{{ t.activeAlarms() }}</strong></div>
+    <div><span>Nachrichten</span><strong>{{ t.msgRate() }}<small> /s</small></strong></div>
+    <div><span>Backend-Services</span><strong [class.lvl-ok]="t.backendOnline()">{{ t.backendOnline() ? 'aktiv' : 'offline' }}</strong></div>
+  </section>
+
+  <div class="grid">
+    <div class="fleet">
+      @if (!t.connected()) {
+        <div class="skeleton" aria-busy="true"><div></div><div></div><div></div></div>
+      } @else {
+        @for (d of t.devices(); track d.id) {
+          <app-fan-card [device]="d" />
+        } @empty {
+          <div class="empty">
+            <app-fan-glyph class="empty-mark" />
+            <h2>Noch kein Lüfter in der Flotte</h2>
+            <p>Verbinde ein iPhone als Edge-Gerät oder starte einen simulierten Lüfter in diesem Tab.</p>
+            <div class="row">
+              <button type="button" class="btn btn-primary" (click)="openQr()">iPhone verbinden</button>
+              <button type="button" class="btn" (click)="sim.start()">Lüfter simulieren</button>
+            </div>
+          </div>
+        }
+      }
+    </div>
+
+    <aside aria-label="Ereignisse">
+      <h2>Ereignisse</h2>
+      <ol>
+        @for (e of t.log(); track e.ts + e.text) {
+          <li [class]="'lvl-' + e.level">
+            <time>{{ e.ts | date: 'HH:mm:ss' }}</time>
+            <span><b>{{ e.deviceId }}</b> {{ e.text }}</span>
+          </li>
+        } @empty {
+          <li class="muted">Alarme, Commands und Statuswechsel erscheinen hier.</li>
+        }
+      </ol>
+    </aside>
+  </div>
+</main>
+
+<dialog #qr class="qr" (click)="$event.target === qr && closeQr()" aria-labelledby="qr-title">
+  <h2 id="qr-title">iPhone als Edge-Gerät</h2>
+  <app-qr-code [value]="deviceUrl" [size]="220" />
+  <ol>
+    <li>Code mit der iPhone-Kamera scannen</li>
+    <li>„Sensoren starten“ tippen und Bewegung erlauben</li>
+    <li>Handy drehen = Drehzahl, schütteln = Unwucht</li>
+  </ol>
+  <p class="mono url">{{ deviceUrl }}</p>
+  <button type="button" class="btn" (click)="closeQr()">Schließen</button>
+</dialog>

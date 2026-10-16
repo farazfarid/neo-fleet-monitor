@@ -1,0 +1,30 @@
+:host { display: flex; flex-direction: column; gap: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 24px }
+header { display: flex; align-items: center; gap: 12px }
+.title { flex: 1; min-width: 0 }
+h2 { margin: 0; font: 500 15px/1.3 var(--mono) }
+.meta { color: var(--muted); font-size: 12px }
+.pill { font-size: 12px; padding: 3px 10px; border-radius: 99px; background: var(--chip); color: var(--muted) }
+.pill.dcv { color: var(--ok); background: color-mix(in srgb, var(--ok) 14%, transparent) }
+.pill.on { color: var(--ok); background: color-mix(in srgb, var(--ok) 14%, transparent) }
+.fan { width: 40px; height: 40px }
+.fan.stopped { color: var(--muted) }
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px }
+.kpis > div { display: flex; flex-direction: column; background: var(--chip); border-radius: 12px; padding: 12px }
+.k { font: 500 11px/1.4 var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted) }
+.v { font-size: 26px; font-weight: 600; letter-spacing: -.01em; font-variant-numeric: tabular-nums; margin-top: 2px }
+.v.badge { font-size: 16px; text-transform: uppercase; margin-top: 8px }
+.u { font-size: 11px; color: var(--muted) }
+h3 { margin: 0 0 6px; font-size: 13px; font-weight: 600 }
+h3 small { color: var(--muted); font-weight: 400; margin-left: 6px }
+footer { display: flex; gap: 12px; align-items: end; border-top: 1px solid var(--line); padding-top: 14px }
+label { flex: 1; font-size: 13px; color: var(--muted); display: flex; flex-direction: column; gap: 6px }
+label strong { color: var(--fg) }
+input[type=range] { width: 100%; accent-color: var(--accent) }
+button { border: 1px solid var(--line); background: var(--chip); color: var(--fg); border-radius: 10px; padding: 8px 14px; font: inherit; font-size: 13px; cursor: pointer }
+button:disabled, input:disabled { opacity: .4; cursor: not-allowed }
+.lvl-ok { color: var(--ok) } .lvl-warning { color: var(--warn) } .lvl-critical { color: var(--crit) }
+@media (max-width: 600px) { .kpis { grid-template-columns: repeat(2, 1fr) } }
+
+.panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px 20px }
+.panels section { min-width: 0 }
+label em { font-style: normal; color: var(--ok); font-size: 12px }

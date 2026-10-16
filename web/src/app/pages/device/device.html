@@ -1,0 +1,47 @@
+<header>
+  <a routerLink="/" class="brand"><app-fan-glyph class="mark" /> Fleet Monitor</a>
+  <span class="conn"><span class="dot" [class.on]="connected()"></span>{{ connected() ? 'verbunden' : 'getrennt' }}</span>
+</header>
+
+<section class="hero">
+  <app-fan-glyph class="big-fan" [rpm]="phase() === 'running' ? rpm() : 0" />
+  <p class="id mono">{{ id }}</p>
+  @switch (phase()) {
+    @case ('idle') {
+      <h1>Dein iPhone als Edge-Gerät</h1>
+      <p class="lead">Gyroskop und Beschleunigungssensor werden zu Drehzahl und Vibration. Das Dashboard zeigt dich live in der Flotte.</p>
+      <button type="button" class="btn btn-primary btn-lg start" (click)="start()">Sensoren starten</button>
+    }
+    @case ('denied') {
+      <h1>Bewegungssensoren blockiert</h1>
+      <p class="lead">Safari braucht deine Erlaubnis. Seite neu laden und beim Hinweis „Erlauben“ tippen.</p>
+      <button type="button" class="btn btn-lg start" (click)="start()">Erneut versuchen</button>
+    }
+    @case ('unsupported') {
+      <h1>Keine Bewegungssensoren gefunden</h1>
+      <p class="lead">Öffne diese Seite auf einem Smartphone. Am Desktop kannst du im Dashboard einen Lüfter simulieren.</p>
+      <a routerLink="/dashboard" class="btn btn-lg start">Zum Dashboard</a>
+    }
+    @case ('running') {
+      <div class="readouts">
+        <div><span class="k">Drehzahl</span><span class="v">{{ rpm() }}</span><span class="u">rpm</span></div>
+        <div><span class="k">Vibration</span><span class="v" [class]="'v lvl-' + (alarm() ?? 'ok')">{{ vib() | number: '1.2-2' }}</span><span class="u">m/s² RMS</span></div>
+        <div><span class="k">Neigung</span><span class="v">{{ tilt() | number: '1.0-0' }}°</span><span class="u">Einbaulage</span></div>
+        <div><span class="k">Peak (FFT)</span><span class="v">{{ peakHz() === null ? '–' : (peakHz() | number: '1.1-1') }}</span><span class="u">Hz</span></div>
+      </div>
+    }
+  }
+</section>
+
+@if (phase() === 'running') {
+  <section class="panel">
+    <div class="line"><span>Alarm vom Backend</span><strong [class]="'lvl-' + (alarm() ?? 'ok')">{{ alarm() ?? 'ok' }}</strong></div>
+    <div class="line"><span>Sollwert vom Dashboard</span><strong>{{ setpoint() ? setpoint()!.rpm + ' rpm' : '–' }}@if (setpoint()?.dcv) { <em>DCV</em> }</strong></div>
+    <div class="line"><span>Gesendet</span><strong class="mono">{{ sent() }} Nachrichten</strong></div>
+  </section>
+  <section class="tips">
+    <p><b>Flach hinlegen und drehen</b> wie ein Lüfterrad: Die Drehzahl steigt.</p>
+    <p><b>Kräftig schütteln:</b> Das Backend meldet nach 1 s Unwucht.</p>
+  </section>
+  <button type="button" class="btn stop" (click)="stop()">Gerät trennen</button>
+}

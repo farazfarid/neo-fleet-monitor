@@ -1,0 +1,59 @@
+/* tastemaker stamp | mood: technical | mode: dark | palette seed 7 (triadic, base hue 253)
+   contrast: text/bg 17.7, text/surface 16.4, muted/bg 6.7, muted/surface 6.2, primary/on-primary 4.69 (text-safe),
+   bg/primary 4.23 (UI-safe only, so small primary text uses --primary-text). Accent #e47987 dropped: collides with alarm red.
+   structure: landing = Split hero w/ live proof visual -> pipeline diagram -> alternating service rows -> stat -> try-it -> spec table -> footer */
+:root {
+  color-scheme: dark;
+  --bg: #070a0f;
+  --surface: #11151a;
+  --surface-2: #161b22;
+  --chip: #1a2029;
+  --line: #1c2126;
+  --line-strong: #2a323d;
+  --fg: #eaf3fe;
+  --muted: #8b97a8;
+  --primary: #3276bf;
+  --primary-text: #7fb2ec;
+  --on-primary: #ffffff;
+  --accent: #5d9be0;
+  --ok: #34d399;
+  --warn: #fbbf24;
+  --crit: #f87171;
+
+  --font: 'Inter Tight', system-ui, -apple-system, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+
+  --r-sm: 8px; --r-md: 12px; --r-lg: 18px; --r-xl: 24px;
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+}
+* { box-sizing: border-box }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100% }
+html, body { margin: 0; background: var(--bg); color: var(--fg); font: 400 16px/1.55 var(--font); -webkit-font-smoothing: antialiased }
+a { color: inherit }
+code, .mono { font-family: var(--mono); font-size: .86em }
+code { background: var(--chip); padding: 1px 6px; border-radius: 5px; color: var(--primary-text) }
+::selection { background: var(--primary); color: var(--on-primary) }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px }
+
+.btn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line-strong); background: var(--surface-2); color: var(--fg);
+  border-radius: 999px; padding: 10px 18px; font: 500 14px/1 var(--font); text-decoration: none; cursor: pointer;
+  transition: background-color .16s var(--ease-out), border-color .16s var(--ease-out), transform .16s var(--ease-out) }
+.btn:hover { background: var(--chip); border-color: #3a4452 }
+.btn:active { transform: scale(.97) }
+.btn:disabled { opacity: .45; cursor: not-allowed; transform: none }
+.btn-primary { background: var(--primary); border-color: var(--primary); color: var(--on-primary) }
+.btn-primary:hover { background: #3b82d0; border-color: #3b82d0 }
+.btn-lg { padding: 14px 24px; font-size: 15px }
+.link-arrow { color: var(--primary-text); text-decoration: none; font-weight: 500; font-size: 15px }
+.link-arrow:hover { text-decoration: underline; text-underline-offset: 4px }
+
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none }
+.dot.on { background: var(--ok); box-shadow: 0 0 0 4px color-mix(in srgb, var(--ok) 18%, transparent) }
+.dot.bad { background: var(--crit) }
+
+.lvl-ok { color: var(--ok) } .lvl-warning { color: var(--warn) } .lvl-critical { color: var(--crit) }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important }
+}

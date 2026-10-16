@@ -1,0 +1,192 @@
+<!-- Fonts: Inter Tight + IBM Plex Mono (Google Fonts, OFL). No third-party images: every visual is live data or generated from the demo's own models. -->
+<header class="nav">
+  <a routerLink="/" class="brand" aria-label="Fleet Monitor">
+    <app-fan-glyph class="mark" />
+    <span>Fleet Monitor</span>
+  </a>
+  <nav aria-label="Hauptnavigation">
+    <a routerLink="/" fragment="funktion">Funktionsweise</a>
+    <a routerLink="/" fragment="services">Services</a>
+    <a routerLink="/" fragment="testen">Ausprobieren</a>
+    <a [href]="repoUrl" target="_blank" rel="noopener">GitHub</a>
+  </nav>
+  <a routerLink="/dashboard" class="btn btn-primary">Dashboard</a>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-copy" data-hero>
+      <p class="live mono"><span class="dot" [class.on]="t.connected()"></span>{{ t.onlineCount() }} Lüfter gerade online</p>
+      <h1>Ein iPhone wird zum <span class="hl">vernetzten Lüfter.</span></h1>
+      <p class="sub">Gyroskop und Beschleunigungssensor liefern Drehzahl und Vibration per MQTT. Backend-Services erkennen Unwucht und regeln die Lüftung, ein Angular-Dashboard zeigt alles live.</p>
+      <div class="cta">
+        <a routerLink="/dashboard" class="btn btn-primary btn-lg">Live-Dashboard öffnen</a>
+        <a routerLink="/" fragment="testen" class="link-arrow">Mit dem iPhone verbinden →</a>
+      </div>
+    </div>
+    <app-hero-live class="hero-visual" />
+  </section>
+
+  <section id="funktion" class="section">
+    <div class="head" data-reveal>
+      <p class="kicker mono">01 · Funktionsweise</p>
+      <h2>Vier Stationen, ein Datenstrom.</h2>
+      <p>Jede Station macht genau eine Sache. Deshalb lässt sich jede einzeln austauschen: der Broker gegen AWS IoT Core, das iPhone gegen ein Gateway am echten Lüfter.</p>
+    </div>
+    <ol class="pipeline">
+      <li data-stage>
+        <span class="num mono">Edge</span>
+        <h3>iPhone</h3>
+        <p>DeviceMotion mit 60 Hz, verdichtet zu RMS und FFT direkt auf dem Gerät.</p>
+        <code>…/telemetry · 5 Hz</code>
+      </li>
+      <li data-stage>
+        <span class="num mono">Transport</span>
+        <h3>MQTT-Broker</h3>
+        <p>WSS, QoS 0 für Messwerte, QoS 1 für Befehle. Last Will meldet Ausfälle.</p>
+        <code>{{ t.msgRate() }} msg/s gerade</code>
+      </li>
+      <li data-stage>
+        <span class="num mono">Cloud</span>
+        <h3>Backend-Services</h3>
+        <p>Alarm-Regel mit Hysterese und ein PI-Regler für die Lüftung, als normaler MQTT-Client.</p>
+        <code>…/alarm · …/cmd</code>
+      </li>
+      <li data-stage>
+        <span class="num mono">UI</span>
+        <h3>Angular-Dashboard</h3>
+        <p>Ein Service, eine Verbindung, alles Signals. Zoneless und OnPush.</p>
+        <code>/dashboard</code>
+      </li>
+    </ol>
+    <p class="return mono" data-reveal><span aria-hidden="true">↺</span> Rückkanal: Sollwert, Identify und Filtertausch gehen als Command zurück ans Gerät.</p>
+  </section>
+
+  <section id="services" class="section">
+    <div class="head" data-reveal>
+      <p class="kicker mono">02 · Digital Services</p>
+      <h2>Aus Rohdaten werden Entscheidungen.</h2>
+      <p>Drei Services, wie man sie für EC-Ventilatoren in der Cloud anbietet: Zustand erkennen, nach Bedarf regeln, Wartung vorhersagen.</p>
+    </div>
+
+    <article class="service" data-reveal>
+      <div class="copy">
+        <h3>Vibrationsanalyse</h3>
+        <p>Das Gerät rechnet die FFT selbst und schickt ein Spektrum pro Sekunde. Steht der höchste Peak bei der Drehfrequenz (1×), ist das Rad unwuchtig. Der Peak bei 5× ist die Schaufelpassierfrequenz.</p>
+        <p class="meta mono">{{ spectrumSource().live ? 'Live von ' + spectrumSource().id : 'Beispiel: 1380 rpm mit Unwucht' }}</p>
+      </div>
+      <figure class="viz">
+        <app-spectrum-chart [spectrum]="spectrumSource().spectrum" [rpm]="spectrumSource().rpm" />
+      </figure>
+    </article>
+
+    <article class="service flip" data-reveal>
+      <div class="copy">
+        <h3>Bedarfsgeführte Lüftung</h3>
+        <p>Ein PI-Regler im Backend hält CO₂ bei 800 ppm. Kommen zehn Personen dazu, dreht der Lüfter hoch. Gehen sie, spart er sofort Energie.</p>
+        <p class="legend mono"><span class="sw co2"></span>CO₂ (ppm) <span class="sw rpm"></span>Drehzahl <span class="sw tgt"></span>Ziel 800 ppm</p>
+      </div>
+      <figure class="viz">
+        <svg [attr.viewBox]="'0 -10 ' + dcv.W + ' ' + (dcv.H + 30)" role="img" aria-label="CO₂ und Drehzahl über die Zeit: Der Regler gleicht den Anstieg aus">
+          <rect [attr.x]="dcv.arriveX" y="0" [attr.width]="dcv.leaveX - dcv.arriveX" [attr.height]="dcv.H" class="band" />
+          <text [attr.x]="dcv.arriveX + 8" y="14" class="note">14 Personen</text>
+          <line x1="0" [attr.x2]="dcv.W" [attr.y1]="dcv.targetY" [attr.y2]="dcv.targetY" class="target" />
+          <path [attr.d]="dcv.rpm" class="l-rpm" data-draw />
+          <path [attr.d]="dcv.co2" class="l-co2" data-draw />
+          <text x="0" [attr.y]="dcv.H + 18" class="note">0 s</text>
+          <text [attr.x]="dcv.W" [attr.y]="dcv.H + 18" class="note end">240 s</text>
+        </svg>
+        <figcaption class="mono">Simulation mit demselben Regler wie im Backend (Kp 4, Ki 0,4, Anti-Windup)</figcaption>
+      </figure>
+    </article>
+
+    <article class="service" data-reveal>
+      <div class="copy">
+        <h3>Filter-Zusetzung vorhersagen</h3>
+        <p>Der Druckverlust hängt von der Drehzahl ab (Δp ∝ n²). Normiert auf eine Referenzdrehzahl bleibt nur der Filter übrig. Eine lineare Regression sagt den Wechsel voraus, bevor Leistung verloren geht.</p>
+        <p class="meta mono">Prognose: Wechsel in ~{{ filter.etaSteps }} Messintervallen</p>
+      </div>
+      <figure class="viz">
+        <svg [attr.viewBox]="'0 -10 ' + filter.W + ' ' + (filter.H + 20)" role="img" aria-label="Filterzusetzung steigt linear, Regression schneidet die 100-Prozent-Grenze">
+          <line x1="0" [attr.x2]="filter.W" [attr.y1]="filter.limitY" [attr.y2]="filter.limitY" class="limit" />
+          <text x="0" [attr.y]="filter.limitY - 6" class="note">100 % Wechselgrenze</text>
+          @for (d of filter.dots; track $index) { <circle [attr.cx]="d.cx" [attr.cy]="d.cy" r="3" class="pt" /> }
+          <path [attr.d]="filter.fit" class="fit" data-draw />
+          <line [attr.x1]="filter.etaX" [attr.x2]="filter.etaX" [attr.y1]="filter.limitY" [attr.y2]="filter.H" class="eta" />
+          <circle [attr.cx]="filter.etaX" [attr.cy]="filter.limitY" r="5" class="eta-dot" />
+          <text [attr.x]="filter.etaX - 6" [attr.y]="filter.H - 6" class="note end">Wechsel</text>
+        </svg>
+      </figure>
+    </article>
+  </section>
+
+  <section class="section stat" data-reveal>
+    <div class="stat-copy">
+      <p class="kicker mono">03 · Warum Regeln sich lohnt</p>
+      <p class="big"><span>50 %</span> Drehzahl</p>
+      <p class="big"><span class="hl">12,5 %</span> Leistung</p>
+      <p>Die Leistung eines Lüfters wächst mit der dritten Potenz der Drehzahl. Wer nach Bedarf regelt statt auf Volllast zu fahren, spart überproportional. Das Dashboard rechnet das für jeden Lüfter live aus.</p>
+    </div>
+    <figure class="viz affinity">
+      <svg [attr.viewBox]="'-6 -10 ' + (affinity.W + 12) + ' ' + (affinity.H + 34)" role="img" aria-label="Leistung über Drehzahl: kubische Kurve, bei halber Drehzahl 12,5 Prozent Leistung">
+        <path [attr.d]="affinity.linear" class="lin" />
+        <path [attr.d]="affinity.cubic" class="cub" data-draw />
+        <line [attr.x1]="affinity.mx" [attr.x2]="affinity.mx" [attr.y1]="affinity.my" [attr.y2]="affinity.H" class="guide" />
+        <line x1="0" [attr.x2]="affinity.mx" [attr.y1]="affinity.my" [attr.y2]="affinity.my" class="guide" />
+        <circle [attr.cx]="affinity.mx" [attr.cy]="affinity.my" r="6" class="eta-dot" />
+        <text [attr.x]="affinity.mx + 10" [attr.y]="affinity.my - 8" class="note strong">P ∝ n³</text>
+        <text x="0" [attr.y]="affinity.H + 22" class="note">0</text>
+        <text [attr.x]="affinity.mx" [attr.y]="affinity.H + 22" class="note mid">50 % n</text>
+        <text [attr.x]="affinity.W" [attr.y]="affinity.H + 22" class="note end">100 % n</text>
+      </svg>
+    </figure>
+  </section>
+
+  <section id="testen" class="section">
+    <div class="head" data-reveal>
+      <p class="kicker mono">04 · Ausprobieren</p>
+      <h2>Dein Handy kommt in die Flotte.</h2>
+    </div>
+    <div class="try">
+      <div class="try-card qr-card" data-reveal>
+        <app-qr-code [value]="deviceUrl" [size]="184" />
+        <ol>
+          <li>Code mit der iPhone-Kamera scannen</li>
+          <li>„Sensoren starten“ tippen, Bewegung erlauben</li>
+          <li>Handy flach drehen oder kräftig schütteln</li>
+        </ol>
+        <p class="mono url">{{ deviceUrl }}</p>
+      </div>
+      <div class="try-card" data-reveal>
+        <h3>Kein iPhone zur Hand?</h3>
+        <p>Ein simulierter Lüfter läuft in diesem Tab und spricht MQTT wie ein echtes Gerät: mit Unwucht alle 70 Sekunden, Raumluft und einem Filter, der langsam zusetzt.</p>
+        <button type="button" class="btn btn-primary btn-lg" (click)="simulate()">Lüfter simulieren und Dashboard öffnen</button>
+        <p class="status mono">
+          <span class="dot" [class.on]="t.connected()"></span>Broker {{ t.connected() ? 'verbunden' : 'getrennt' }}
+          <span class="dot" [class.on]="t.backendOnline()"></span>Backend {{ t.backendOnline() ? 'aktiv' : 'offline' }}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" data-reveal>
+    <div class="head">
+      <p class="kicker mono">05 · Unter der Haube</p>
+      <h2>Bewusst wenige Abhängigkeiten.</h2>
+    </div>
+    <dl class="spec">
+      <div><dt>Frontend</dt><dd>Angular 22, Standalone, Signals, <code>linkedSignal</code>, zoneless, OnPush, lazy Routes</dd></div>
+      <div><dt>Charts</dt><dd>Eigene SVG-Komponenten, keine Chart-Library</dd></div>
+      <div><dt>Transport</dt><dd>MQTT über WSS, Topics <code>farazfarid/neo/fans/&#123;id&#125;/…</code>, Retained und Last Will</dd></div>
+      <div><dt>Backend</dt><dd>Node, <code>mqtt.js</code>, Alarm-Regel, PI-Regler, Heartbeat</dd></div>
+      <div><dt>Edge</dt><dd>DeviceMotion API, 200-ms-Fenster, Hann-gefensterte DFT über 128 Samples</dd></div>
+      <div><dt>Motion</dt><dd>GSAP ScrollTrigger, respektiert <code>prefers-reduced-motion</code></dd></div>
+    </dl>
+    <a [href]="repoUrl" target="_blank" rel="noopener" class="btn">Quellcode auf GitHub</a>
+  </section>
+</main>
+
+<footer class="footer">
+  <span>Gebaut von <a href="https://www.farazfarid.com" target="_blank" rel="noopener">Faraz Farid</a> · Oktober 2026</span>
+  <span class="mono">Demo-Projekt, öffentlicher Broker: bitte keine sensiblen Daten senden.</span>
+</footer>

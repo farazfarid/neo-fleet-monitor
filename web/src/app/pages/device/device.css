@@ -1,0 +1,27 @@
+:host { display: flex; flex-direction: column; gap: 20px; min-height: 100dvh; max-width: 480px; margin: 0 auto; padding: max(16px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom)); transition: background-color .2s var(--ease-out) }
+:host(.flash) { background: #1d4ed8 }
+header { display: flex; justify-content: space-between; align-items: center }
+.brand { display: flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 600 }
+.mark { width: 22px; height: 22px }
+.conn { display: flex; align-items: center; gap: 8px; font: 500 12px var(--mono); color: var(--muted) }
+.hero { text-align: center; display: grid; justify-items: center; gap: 8px; padding-top: 24px }
+.big-fan { width: 112px; height: 112px; margin-bottom: 8px }
+.id { color: var(--muted); font-size: 13px; margin: 0 }
+h1 { font-size: 28px; line-height: 1.15; letter-spacing: -.02em; margin: 8px 0 0; font-weight: 600 }
+.lead { color: var(--muted); margin: 0; max-width: 34ch }
+.start { margin-top: 16px; width: 100%; justify-content: center }
+.readouts { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px }
+.readouts div { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); padding: 14px; display: flex; flex-direction: column; text-align: left }
+.k { font: 500 11px/1.4 var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted) }
+.v { font-size: 32px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums }
+.u { font-size: 12px; color: var(--muted) }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 6px 16px }
+.line { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 14px }
+.line:last-child { border: 0 }
+.line span { color: var(--muted) }
+.line strong { font-weight: 600; text-transform: none }
+em { font: 500 11px var(--mono); font-style: normal; color: var(--ok); margin-left: 6px }
+.tips { color: var(--muted); font-size: 14px }
+.tips p { margin: 0 0 8px }
+.tips b { color: var(--fg); font-weight: 600 }
+.stop { align-self: center }
